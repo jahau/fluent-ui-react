@@ -5,7 +5,7 @@ import {
   useAccessibility,
   useStyles,
 } from '@fluentui/react-bindings'
-import { useContextSelector } from '@fluentui/react-context-selector'
+import { useContextSelectors } from '@fluentui/react-context-selector'
 import cx from 'classnames'
 import * as _ from 'lodash'
 import * as PropTypes from 'prop-types'
@@ -101,17 +101,26 @@ const ListItem: React.FC<WithAsProp<ListItemProps> & { index: number }> & {
 
   const context: ProviderContextPrepared = React.useContext(ThemeContext)
 
-  const debug = useContextSelector(ListContext, v => v.debug) || props.debug
-  const navigable = useContextSelector(ListContext, v => v.navigable) || props.navigable
-  const selectable = useContextSelector(ListContext, v => v.selectable) || props.selectable
-  const truncateContent =
-    useContextSelector(ListContext, v => v.truncateContent) || props.truncateContent
-  const truncateHeader =
-    useContextSelector(ListContext, v => v.truncateHeader) || props.truncateHeader
-  const variables = useContextSelector(ListContext, v => v.variables) || props.variables
+  const parentProps = useContextSelectors(ListContext, {
+    debug: v => v.debug,
+    navigable: v => v.navigable,
+    selectable: v => v.selectable,
+    truncateContent: v => v.truncateContent,
+    truncateHeader: v => v.truncateHeader,
+    variables: v => v.variables,
 
-  const onItemClick = useContextSelector(ListContext, v => v.onItemClick)
-  const selected = useContextSelector(ListContext, v => v.selectedIndex === index)
+    onItemClick: v => v.onItemClick,
+    selected: v => v.selectedIndex === props.index,
+  })
+  const {
+    debug = parentProps.debug,
+    navigable = parentProps.navigable,
+    selectable = parentProps.selectable,
+    selected = parentProps.selected,
+    truncateContent = parentProps.truncateContent,
+    truncateHeader = parentProps.truncateHeader,
+    variables = parentProps.variables,
+  } = props
 
   const getA11Props = useAccessibility(accessibility, {
     debugName: ListItem.displayName,
@@ -148,7 +157,7 @@ const ListItem: React.FC<WithAsProp<ListItemProps> & { index: number }> & {
 
   const handleClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     _.invoke(props, 'onClick', e, props)
-    onItemClick(e, index)
+    parentProps.onItemClick(e, index)
   }
 
   const contentElement = Box.create(content, {

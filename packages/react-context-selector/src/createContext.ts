@@ -1,9 +1,11 @@
 import * as React from 'react'
+
 import { ContextListener, ContextValue, Context } from './types'
+import { CONTEXT_SUBSCRIBE_PROPERTY, CONTEXT_VALUE_PROPERTY } from './utils'
 
-export const SUBSCRIBE_CONTEXT_PROPERTY = 's'
-export const VALUE_CONTEXT_PROPERTY = 'v'
-
+// Disables updates propogation for React Content. React has a special handling for "0" value.
+//
+// @see https://github.com/facebook/react/blob/b53ea6ca05d2ccb9950b40b33f74dfee0421d872/packages/react-reconciler/src/ReactFiberBeginWork.js#L2576
 const calculateChangedBits = () => 0
 
 const createProvider = <Value>(
@@ -29,8 +31,8 @@ const createProvider = <Value>(
   }, [])
 
   const value: ContextValue<Value> = {
-    [SUBSCRIBE_CONTEXT_PROPERTY]: subscribe,
-    [VALUE_CONTEXT_PROPERTY]: props.value,
+    [CONTEXT_SUBSCRIBE_PROPERTY]: subscribe,
+    [CONTEXT_VALUE_PROPERTY]: props.value,
   }
 
   return React.createElement(Original, { value }, props.children)
@@ -39,14 +41,14 @@ const createProvider = <Value>(
 export const createContext = <Value>(defaultValue: Value): Context<Value> => {
   const context = React.createContext<ContextValue<Value>>(
     {
-      get [SUBSCRIBE_CONTEXT_PROPERTY](): any {
+      get [CONTEXT_SUBSCRIBE_PROPERTY](): any {
         throw new Error(
           process.env.NODE_ENV === 'production'
             ? ''
-            : `Please use <Provider> from "@fluentui/react-bindings"`,
+            : `Please use <Provider /> component from "@fluentui/react-context-selector"`,
         )
       },
-      [VALUE_CONTEXT_PROPERTY]: defaultValue,
+      [CONTEXT_VALUE_PROPERTY]: defaultValue,
     },
     calculateChangedBits,
   )
